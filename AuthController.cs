@@ -1,9 +1,13 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using AutoMapper;
 using BeFriendr.Accounts.Requests;
+using BeFriendr.Auth.Accounts.Entities;
 using BeFriendr.Auth.Accounts.Interfaces;
 using BeFriendr.Auth.Authentication.Interfaces;
 using BeFriendr.Auth.Responses;
+using BeFriendr.Common.Messages;
+using MassTransit;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BeFriendr.Auth
@@ -15,22 +19,30 @@ namespace BeFriendr.Auth
         private readonly IAccountService _accountService;
         private readonly ITokenService _tokenService;
         private readonly UnitOfWork _unitOfWork;
-        public AuthController(UnitOfWork unitOfWork, IAccountService accountService, ITokenService tokenService)
+        private readonly IPublishEndpoint _publishEndpoint;
+        private readonly IMapper _mapper;
+        public AuthController(UnitOfWork unitOfWork, IAccountService accountService, ITokenService tokenService, IPublishEndpoint publishEndpoint
+        , IMapper mapper)
         {
+            _mapper = mapper;
+            _publishEndpoint = publishEndpoint;
             _unitOfWork = unitOfWork;
             _tokenService = tokenService;
             _accountService = accountService;
 
         }
         [HttpPost("register")]
-        public async Task<ActionResult<RegisterResponse>> Register(RegisterRequest request)
+        public async Task<ActionResult<RegisterResponse>> Register([FromBody] RegisterRequest request)
         {
             var account = await _accountService.RegisterAsync(request);
             var token = _tokenService.CreateToken(new List<Claim>{
-                new Claim( JwtRegisteredClaimNames.NameId, request.UserName)
+                new Claim( ClaimTypes.NameIdentifier, request.UserName),
+                new Claim(ClaimTypes.Role, account.Role)
             });
 
             await _unitOfWork.SaveAllAsync();
+            var message = _mapper.Map<AccountCreatedMessage>(account);
+            await _publishEndpoint.Publish(message);
 
             var response = new RegisterResponse
             {
@@ -38,6 +50,7 @@ namespace BeFriendr.Auth
                 UserName = account.UserName,
                 Token = token
             };
+
             return Ok(response);
         }
 

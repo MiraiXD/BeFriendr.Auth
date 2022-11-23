@@ -20,15 +20,15 @@ namespace BeFriendr.Accounts.Requests
         [Required]
         [Compare("Password")]
         public string ConfirmPassword { get; init; }
-        // [Required]
-        // [StringLength(20,MinimumLength =2)]
-        // public string FirstName { get; init; }
-        // [Required]
-        // [StringLength(20,MinimumLength =2)]
-        // public string LastName { get; init; }
-        // [Required]
-        // public DateTime BirthDate { get; init; }
-        // [Required]
-        // public string Gender { get; init; }
+        [Required]
+        [StringLength(20,MinimumLength =2)]
+        public string FirstName { get; init; }
+        [Required]
+        [StringLength(20,MinimumLength =2)]
+        public string LastName { get; init; }
+        [Required]
+        public DateTime BirthDate { get; init; }
+        [Required]
+        public string Gender { get; init; }
     }
 }

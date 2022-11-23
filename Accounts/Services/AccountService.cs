@@ -1,5 +1,6 @@
 using System.Security.Cryptography;
 using System.Text;
+using AutoMapper;
 using BeFriendr.Accounts.Requests;
 using BeFriendr.Auth.Accounts.Entities;
 using BeFriendr.Auth.Accounts.Exceptions;
@@ -10,9 +11,11 @@ namespace BeFriendr.Auth.Accounts.Services
     public class AccountService : IAccountService
     {
         public IAccountRepository AccountRepository { get; }
+        private readonly IMapper _mapper;
 
-        public AccountService(IAccountRepository accountRepository)
+        public AccountService(IAccountRepository accountRepository, IMapper mapper)
         {
+            _mapper = mapper;
             AccountRepository = accountRepository;
         }
 
@@ -35,14 +38,10 @@ namespace BeFriendr.Auth.Accounts.Services
 
             using var hmac = new HMACSHA256();
 
-            account = new Account
-            {
-                Email = request.Email,
-                UserName = request.UserName,
-                PasswordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(request.Password)),
-                PasswordSalt = hmac.Key,
-                Role = Account.UserRole.User.ToString()
-            };
+            account = _mapper.Map<Account>(request);
+            account.PasswordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(request.Password));
+            account.PasswordSalt = hmac.Key;
+            account.Role = Account.UserRole.User.ToString();
 
             AccountRepository.Insert(account);
 

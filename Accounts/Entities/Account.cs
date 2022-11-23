@@ -23,6 +23,19 @@ namespace BeFriendr.Auth.Accounts.Entities
         public byte[] PasswordSalt { get; set; }
         [Required]
         public string Role { get; set; }
+        [Required]
+        [MaxLength(20)]
+        [MinLength(2)]
+        public string FirstName { get; set; }
+        [Required]
+        [MaxLength(20)]
+        [MinLength(2)]
+        public string LastName { get; set; }
+        [Required]
+        public DateTime BirthDate { get; set; }
+        [Required]
+        public string Gender { get; set; }
+
         public enum UserRole
         {
             Admin,

@@ -1,7 +1,9 @@
+using System.Reflection;
 using BeFriendr.Auth;
 using BeFriendr.Auth.Accounts.Extensions;
 using BeFriendr.Auth.Authentication.Extensions;
 using BeFriendr.Auth.Middleware;
+using MassTransit;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -22,6 +24,16 @@ builder.Services.AddDbContext<DbContext, AuthDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 builder.Services.AddScoped<UnitOfWork>();
+builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
+builder.Services.AddMassTransit(x =>
+                {
+                    x.UsingRabbitMq((context, cfg) =>
+                    {
+                        cfg.Host("rabbitmq://guest:guest@localhost:5672");
+                    });
+                });
+
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -35,5 +47,4 @@ app.UseHttpsRedirection();
 app.UseCors(policy => policy.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin());
 
 app.MapControllers();
-
 app.Run();
