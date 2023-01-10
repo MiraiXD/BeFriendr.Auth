@@ -21,7 +21,7 @@ namespace BeFriendr.Auth.Authentication.Services
             _authenticationSettings = authenticationSettings;
             _key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_authenticationSettings.SecretKey));
         }
-        public string CreateToken(List<Claim> claims)
+        public string CreateToken(IEnumerable<Claim> claims)
         {
             var credentials = new SigningCredentials(_key, SecurityAlgorithms.HmacSha256);
             var tokenDescriptor = new SecurityTokenDescriptor

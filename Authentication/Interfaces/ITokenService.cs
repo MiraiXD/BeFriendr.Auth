@@ -8,6 +8,6 @@ namespace BeFriendr.Auth.Authentication.Interfaces
 {
     public interface ITokenService
     {
-        string CreateToken(List<Claim> claims);
+        string CreateToken(IEnumerable<Claim> claims);
     }
 }
